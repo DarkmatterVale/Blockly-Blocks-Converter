@@ -9,6 +9,8 @@ CodeBlocks uses Python to convert Spin, C, or Forth files into .js files that co
 To build, you will need:
 - Python
 
+Once you have installed all required dependencies, just navigate to this directory in terminal and type "python convertFile.py". This will open a GUI where you can choose which file you would like to convert. The converted file will then be saved inside of the conversions directory.
+
 # License
 ----------------
 
