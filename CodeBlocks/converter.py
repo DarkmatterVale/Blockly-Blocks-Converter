@@ -4,7 +4,6 @@
 
 #importing required libraries
 import os, sys, re
-import argeparse
 
 
 #initializing variables
@@ -13,7 +12,7 @@ converted_true_false = False
 file_name = ""
 new_file_name = ""
 text = ""
-firstfunction = None
+firstfunction = ""
 
 
 #init method
@@ -59,9 +58,10 @@ def get_new_file_name():
 def convert_code():
     #initialize variables
     global error
+    global converted_true_false
     
     #if there is not a file to convert, return
-    if !file_name:
+    if file_name == "":
         #setting variables
         error = "No valid file to conert"
         converted_true_false = False
@@ -72,8 +72,11 @@ def convert_code():
     #since there is a valid file, opening file to read
     file = open( file_name ).read()
 
-    #sorting out comments
-    file = filter_comments( file )
+    #convert
+    compile()
+
+    #switch conversion variable
+    converted_true_false = True
 
 
 def filter_comments(text):
@@ -229,7 +232,7 @@ def split_into_blocks(text):
 
 def compile():
     global file_name
-    f = open( file_name ).read()
+    f = open( file_name ).read()1
             
     f = filter_comments(f)
             
@@ -260,18 +263,12 @@ def compile():
     finalcontent += content['DAT']
             
     # add boiler plate
-    template = open('templates/game.py','r').read()
-    footer = open('templates/footer.py','r').read()
+    template = open('../templates/block_template.py','r').read()
     assembled =  template
     assembled += finalcontent
     assembled += "\n" + firstfunction + "()\n"
-    assembled += footer
             
-    print "Output!"
-    print "------------------------------------------"
-    print assembled
-            
-    newfilename = os.path.basename(filename)+'.py'
+    newfilename = os.path.basename(file_name)+'.py'
     
     newfile = open(newfilename,'w')
     newfile.write(assembled)
