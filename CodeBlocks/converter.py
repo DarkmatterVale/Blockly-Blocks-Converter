@@ -7,76 +7,7 @@ import os, sys, re
 
 
 #initializing variables
-error = ""
-converted_true_false = False
-file_name = ""
-new_file_name = ""
-text = ""
 firstfunction = ""
-
-
-#init method
-def init( filename, newfilename ):
-    #initializing variables
-    global converted_true_false
-    global file_name
-    global new_file_name
-    
-    #setting variable values
-    file_name = filename
-    new_file_name = newfilename
-
-
-#getter method for bool variable converted_true_false
-def get_converted_true_false():
-    #initializing variables
-    global converted_true_false
-    
-    #returning bool variable
-    return converted_true_false
-
-
-#getter method for string variable file_name
-def get_file_name():
-    #initializing variables
-    global file_name
-    
-    #returning string variable
-    return file_name
-
-
-#getter method for string variable new_file_name
-def get_new_file_name():
-    #initializing variables
-    global new_file_name
-    
-    #returning string variable
-    return new_file_name
-
-
-#convert method
-def convert_code():
-    #initialize variables
-    global error
-    global converted_true_false
-    
-    #if there is not a file to convert, return
-    if file_name == "":
-        #setting variables
-        error = "No valid file to conert"
-        converted_true_false = False
-        
-        #returning
-        return
-    
-    #since there is a valid file, opening file to read
-    file = open( file_name ).read()
-
-    #convert
-    #compile()
-
-    #switch conversion variable
-    converted_true_false = True
 
 
 def filter_comments(text):
@@ -230,11 +161,7 @@ def split_into_blocks(text):
     return filter(None, re.split('(\nPUB)|(\nDAT)|(\nPRI)|(\nVAR)|(\nCON)|(\nOBJ)',text))
 
 
-def compile( f ):
-    #global file_name
-    #file = open( file_name, 'r' )
-    #f = file.read()
-            
+def compile( f, new_file_name ):
     f = filter_comments(f)
             
     textblock = split_into_blocks(f)
@@ -269,8 +196,10 @@ def compile( f ):
     assembled += finalcontent
     assembled += firstfunction + "()\n"
             
-    newfilename = os.path.basename("test")+'.py'
+    newfilename = os.path.basename( new_file_name )+'.py'
     
     newfile = open(newfilename,'w')
     newfile.write(assembled)
     newfile.close()
+
+    return True
