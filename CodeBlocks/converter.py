@@ -182,7 +182,7 @@ def compile( f, new_file_name ):
     # Final Formatting
 
     # Assemble pieces into final page for upload
-    finalcontent = "\n"
+    finalcontent = "\n\n"
     finalcontent += content['OBJ']
     finalcontent += content['CON']
     finalcontent += content['VAR']
@@ -194,7 +194,7 @@ def compile( f, new_file_name ):
     template = open('../templates/block_template.py','r').read()
     assembled =  template
     assembled += finalcontent
-    assembled += firstfunction + "()\n"
+    assembled += firstfunction
             
     newfilename = os.path.basename( new_file_name )+'.py'
     
