@@ -73,7 +73,7 @@ def convert_code():
     file = open( file_name ).read()
 
     #convert
-    compile()
+    #compile()
 
     #switch conversion variable
     converted_true_false = True
@@ -230,9 +230,10 @@ def split_into_blocks(text):
     return filter(None, re.split('(\nPUB)|(\nDAT)|(\nPRI)|(\nVAR)|(\nCON)|(\nOBJ)',text))
 
 
-def compile():
-    global file_name
-    f = open( file_name ).read()1
+def compile( f ):
+    #global file_name
+    #file = open( file_name, 'r' )
+    #f = file.read()
             
     f = filter_comments(f)
             
@@ -254,7 +255,7 @@ def compile():
     # Final Formatting
 
     # Assemble pieces into final page for upload
-    finalcontent = ""
+    finalcontent = "\n"
     finalcontent += content['OBJ']
     finalcontent += content['CON']
     finalcontent += content['VAR']
@@ -266,9 +267,9 @@ def compile():
     template = open('../templates/block_template.py','r').read()
     assembled =  template
     assembled += finalcontent
-    assembled += "\n" + firstfunction + "()\n"
+    assembled += firstfunction + "()\n"
             
-    newfilename = os.path.basename(file_name)+'.py'
+    newfilename = os.path.basename("test")+'.py'
     
     newfile = open(newfilename,'w')
     newfile.write(assembled)

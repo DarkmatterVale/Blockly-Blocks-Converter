@@ -23,6 +23,10 @@ class ConvertFile( tk.Tk ):
     def initialize(self):
         self.grid()
         
+        self.text_input = tk.Text( self, height = 4, width = 5 )
+        self.text_input.grid(column=0, row=5, stick='nesw', padx=3, pady=10)
+        self.text_input.insert(tk.END, 'HI', 'Add code here')
+        
         self.lbl_ip_address = ttk.Label(self, anchor=tk.E, text='Tool for converting Spin files into blocks')
         self.lbl_ip_address.grid(column=0, row=0, sticky='nesw', padx=3, pady=10)
         
@@ -44,15 +48,17 @@ class ConvertFile( tk.Tk ):
         self.grid_columnconfigure(0, minsize=100)
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=2)
+        self.grid_rowconfigure(5, minsize=400)
         self.resizable(True, True)
         self.minsize(500, 500)
         
         self.protocol("WM_DELETE_WINDOW", self.handle_close)
     
     def convert( self ):
-        convert.init( self.file_name.get(), self.new_file.get() )
+        #convert.init( self.file_name.get(), self.new_file.get() )
         
-        convert.convert_code()
+        #convert.convert_code()
+        convert.compile( self.text_input.get("1.0", tk.END) )
         
         if convert.get_converted_true_false():
             tkMessageBox.askokcancel("INFO", "File successfully converted.\n\nFile converted:\n" + convert.get_file_name() + "\n\nNew file created:\n" + self.new_file.get() )
