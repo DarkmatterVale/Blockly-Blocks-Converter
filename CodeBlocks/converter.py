@@ -31,6 +31,42 @@ def filter_operators(text):
     return text
 
 
+def function_2_0( text, label ):
+    text = text.split('\n',1)
+    prototype = text[0]
+    if ':' in prototype:
+        if '|' in prototype:
+            title = prototype.split('[:|]')[0]
+            alias=  prototype.split('[:|]')[1]
+            temp =  prototype.split('[:|]')[2]
+        else:
+            title = prototype.split(':')[0]
+            alias = prototype.split(':')[1]
+            temp =  ""
+    else:
+        alias = ""
+        if '|' in prototype:
+            title = prototype.split('|')[0]
+            temp =  prototype.split('|')[1]
+        else:
+            temp = ""
+            title = prototype
+    temps = re.findall(r"[\w]+",temp)
+    title = title.strip()
+
+    if label == 'PUB':
+        global firstfunction
+        if firstfunction == None:
+            firstfunction = title
+
+    block_spin_title = "Blockly.spin." + title + " = function() {\n"
+    block_spin_code = '\tvar code = "' + text[1] + '";\n\treturn code;'
+
+    text = block_spin_title + block_spin_code + "\n}"
+    
+    return text
+
+
 def function(text, label):
     text = text.split('\n',1)
     prototype = text[0]
@@ -148,7 +184,7 @@ def objects(text, label):
 
 
 spinblocks = {
-    'PUB' : function,
+    'PUB' : function_2_0,
     'PRI' : function,
     'DAT' : data,
     'VAR' : variables,
@@ -196,7 +232,7 @@ def compile( f, new_file_name ):
     assembled += finalcontent
     assembled += firstfunction
             
-    newfilename = os.path.basename( new_file_name )+'.py'
+    newfilename = os.path.basename( new_file_name )+'.js'
     
     newfile = open(newfilename,'w')
     newfile.write(assembled)
