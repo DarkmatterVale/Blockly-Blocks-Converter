@@ -22,4 +22,4 @@
 if ( !Blockly.Language )
     Blockly.Language = {};
 
-Blockly.spin = Blockly.Generator.get( 'spin' );
+Blockly.Spin = Blockly.Generator.get( 'Spin' );

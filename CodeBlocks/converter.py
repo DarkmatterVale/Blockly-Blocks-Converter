@@ -40,7 +40,7 @@ def parse_comments( text ):
                 temp_var = re.sub( "VAR_NAME:", "", var_component )
                 
                 final_variables += " " + temp_var
-                final_content += '\tBlockly.spin.setups_[ "LameStation_' + temp_var + '" ] = "int ' + temp_var + '";\n'
+                final_content += '\tBlockly.Spin.setups_[ "LameStation_' + temp_var + '" ] = "int ' + temp_var + '";\n'
 
     text = re.sub( "'.*", "", text )
 
@@ -89,10 +89,10 @@ def function_2_0( text, label ):
 
         final_content_ui += temp_code
 
-    interface_spin_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n}"
+    interface_spin_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n};"
 
     #creating spin code
-    block_spin_title = "Blockly.spin." + title + " = function() {\n"
+    block_spin_title = "Blockly.Spin." + title + " = function() {\n"
     final_content_variables = ""
 
     inputs = final_variables.split()
