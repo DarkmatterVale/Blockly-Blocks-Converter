@@ -6,14 +6,11 @@
 import os, sys, re
 
 
-#initializing variables
-firstfunction     = ""
-
-
 #initializing storage variables for final content
 final_variables   = ""
 final_objects     = ""
 final_content     = ""
+final_constants   = ""
 
 
 def filter_comments(text):
@@ -52,6 +49,8 @@ def parse_comments( text ):
             block_name = var
 
     text = re.sub( "'.*", "", text )
+    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
+    text = "\n" + text
 
     return text, block_category, block_name
 
@@ -61,37 +60,26 @@ def function_2_0( text, label ):
     global final_variables
     global final_content
     global final_objects
+    global final_constants
     
     #initializing local variables
     block_category = ""
     block_name     = ""
     
+    #finding method title
     text = text.split('\n',1)
     prototype = text[0]
     if ':' in prototype:
         if '|' in prototype:
             title = prototype.split('[:|]')[0]
-            alias=  prototype.split('[:|]')[1]
-            temp =  prototype.split('[:|]')[2]
         else:
             title = prototype.split(':')[0]
-            alias = prototype.split(':')[1]
-            temp =  ""
     else:
-        alias = ""
         if '|' in prototype:
             title = prototype.split('|')[0]
-            temp =  prototype.split('|')[1]
         else:
-            temp = ""
             title = prototype
-    temps = re.findall(r"[\w]+",temp)
     title = title.strip()
-
-    if label == 'PUB':
-        global firstfunction
-        if firstfunction == None:
-            firstfunction = title
 
     #parsing comments in each block, then removing whatever is left
     text[1], block_category, block_name = parse_comments( text[1] )
@@ -101,29 +89,39 @@ def function_2_0( text, label ):
     interface_spin_code = "\tcategory: 'LameStation',\n\thelpUrl: '',\n\tinit: function() {\n\t\tthis.appendDummyInput( " + '"" )\n\t\t\t.appendTitle( "' + title + '" );\n'
     final_content_ui = ""
 
+    #adding interface code for variables
     inputs = final_variables.split()
     for input in inputs:
         temp_code = "\t\tthis.appendValueInput( " + "'" + input + "'" + ' )\n\t\t\t.appendTitle( "get ' + input + '" );\n'
 
         final_content_ui += temp_code
 
+    #adding all components of interface code together, final interface code
     interface_spin_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n};"
 
     #creating spin code
     block_spin_title = "Blockly.Spin." + title + " = function() {\n"
     final_content_variables = ""
 
+    #parsing code and substituting variable names in code to allow for variable input
     inputs = final_variables.split()
     for input in inputs:
         final_content_variables += "\tvar " + input + " = Blockly.Spin.valueToCode( this, '" + input + "' );\n"
 
         text[1] = re.sub( input, '" + ' + input + ' + "', text[1] )
 
+    #parsing code and substituting constant names in code to allow for constant input
+    inputs = final_constants.split()
+    for input in inputs:
+        text[1] = re.sub( input, '" + ' + input + ' + "', text[1] )
+
+    #setting final Spin code
     block_spin_code = '\tvar code = "' + text[1] + '";\n\treturn code;'
 
+    #Setting final content in block
     final_content_block = final_content + "\n" + final_objects + "\n" + final_content_variables + "\n" + block_spin_code + "\n};"
 
-    #creating final code for block
+    #creating final code for block, interface and code generated
     text = interface_spin_title + interface_spin_code + "\n\n" + block_spin_title + final_content_block
     
     return text
@@ -148,11 +146,18 @@ def objects(text, label):
 
 
 def constants(text, label):
-    text = re.sub("[\t ]*(.*)","\g<1>",text)
+    global final_constants
+    global final_content
     
-    text = re.sub("[\t ]*_clkmode(.*)","",text)
-    text = re.sub("[\t ]*_xinfreq(.*)","",text)
-    return text
+    constants_ = text.split('\n')
+    for constant in constants_:
+        split_constant = constant.split()
+        
+        if split_constant:
+            final_constants += " " + split_constant[0]
+            final_content += '\tBlockly.Spin.setups_[ "LameStation_' + split_constant[0] + '" ] = "' + constant + '";\n'
+    
+    return ""
 
 
 def variables(text, label):
@@ -185,6 +190,19 @@ def split_into_blocks(text):
 
 
 def compile( f, new_file_name ):
+    #initializing global variables
+    global final_variables
+    global final_objects
+    global final_content
+    global final_constants
+    
+    #reset content variables
+    final_variables   = ""
+    final_objects     = ""
+    final_content     = ""
+    final_constants   = ""
+    
+    #filter out comments
     f = filter_comments(f)
             
     textblock = split_into_blocks(f)
@@ -217,8 +235,7 @@ def compile( f, new_file_name ):
     template = open('../templates/block_template.py','r').read()
     assembled =  template
     assembled += finalcontent
-    assembled += firstfunction
-            
+
     newfilename = os.path.basename( new_file_name )+'.js'
     
     newfile = open(newfilename,'w')
