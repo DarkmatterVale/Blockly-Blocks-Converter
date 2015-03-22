@@ -280,7 +280,7 @@ def compile( f, new_file_name ):
     assembled =  template
     assembled += finalcontent
 
-    newfilename = os.path.basename( new_file_name )+'.js'
+    newfilename = "../conversions/" + os.path.basename( new_file_name ) + '.js'
     
     newfile = open(newfilename,'w')
     newfile.write(assembled)
