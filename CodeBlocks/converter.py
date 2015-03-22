@@ -156,7 +156,18 @@ def constants(text, label):
 
 
 def variables(text, label):
-    return text
+    global final_variables
+    global final_content
+    
+    variables_ = text.split('\n')
+    for variable in variables_:
+        split_variable = variable.split()
+    
+        if split_variable:
+            final_variables += " " + split_variable[1]
+            final_content += '\tBlockly.Spin.setups_[ "LameStation_' + split_variable[1] + '" ] = "' + variable + '";\n'
+    
+    return ""
 
 
 spinblocks = {
