@@ -1,5 +1,3 @@
-This file will describe the steps that need to be completed to convert any Spin code to JS code that is capable of being used in Blockly.
-
 Code to be converted:
 CON
     _clkmode        = xtal1 + pll16x
@@ -57,16 +55,3 @@ Blockly.spin.LameStation_Support = function() {
             outa[LED_PIN]~";
     return code;
 };
-
-
-
-Steps to be converted:
-1.
-
-2.
-
-3.
-
-4.
-
-5.
