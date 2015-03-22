@@ -11,14 +11,30 @@ final_variables   = ""
 final_objects     = ""
 final_content     = ""
 final_constants   = ""
+variable_category = "Blockly-Blocks-Converter"
 
 
 def filter_comments(text):
     text = re.sub("{{(.*?)}}","",text, flags=re.MULTILINE|re.DOTALL)
     text = re.sub("{(.*?)}","",text, flags=re.MULTILINE|re.DOTALL)
     text = re.sub("(?<=\d)_(?=\d)","",text)                           # remove underscores in numbers
+    text = parse_global_comments( text )
     text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
     text = "\n" + text
+    
+    return text
+
+
+def parse_global_comments( text ):
+    global variable_category
+    updated_variables = re.findall( r"'.*", text )
+    
+    for var in updated_variables:
+        var = re.sub("'", "", var )
+        if "VAR_CATEGORY:" in var:
+            var = re.sub( "VAR_CATEGORY:", "", var )
+            
+            variable_category = var
     
     return text
 
@@ -26,9 +42,10 @@ def filter_comments(text):
 def parse_comments( text ):
     global final_variables
     global final_content
+    global variable_category
     updated_variables = re.findall( r"'.*", text )
     
-    block_category = ""
+    block_category = "Blockly-Blocks-Converter"
     block_name = ""
 
     for var in updated_variables:
@@ -38,7 +55,11 @@ def parse_comments( text ):
             var = re.sub( "VAR_NAME:", "", var )
                 
             final_variables += " " + var
-            final_content += '\tBlockly.Spin.setups_[ "LameStation_' + var + '" ] = "int ' + var + '";\n'
+            
+            if variable_category:
+                final_content += '\tBlockly.Spin.setups_[ "' + variable_category + var + '" ] = "int ' + var + '";\n'
+            else:
+                final_content += '\tBlockly.Spin.setups_[ "' + block_category + var + '" ] = "int ' + var + '";\n'
         if "CATEGORY:" in var:
             var = re.sub( "CATEGORY:", "", var )
             
@@ -84,9 +105,12 @@ def function_2_0( text, label ):
     #parsing comments in each block, then removing whatever is left
     text[1], block_category, block_name = parse_comments( text[1] )
 
+    if ( block_name ):
+        title = block_name
+
     #creating interface code
     interface_spin_title = "Blockly.Language." + title + " = {\n"
-    interface_spin_code = "\tcategory: 'LameStation',\n\thelpUrl: '',\n\tinit: function() {\n\t\tthis.appendDummyInput( " + '"" )\n\t\t\t.appendTitle( "' + title + '" );\n'
+    interface_spin_code = "\tcategory: '" + block_category + "',\n\thelpUrl: '',\n\tinit: function() {\n\t\tthis.appendDummyInput( " + '"" )\n\t\t\t.appendTitle( "' + title + '" );\n'
     final_content_ui = ""
 
     #adding interface code for variables
@@ -128,11 +152,20 @@ def function_2_0( text, label ):
 
 
 def data(text, label):
+    text = re.sub( "'.*", "", text )
+    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
+    text = "\n" + text
+    
     return ""
 
 
 def objects(text, label):
     global final_objects
+    global variable_category
+    
+    text = re.sub( "'.*", "", text )
+    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
+    text = "\n" + text
     
     declarations_ = text.split('\n')
     for declaration in declarations_:
@@ -140,7 +173,7 @@ def objects(text, label):
         
         if split_declaration:
         
-            final_objects += '\tBlockly.Spin.definitions_[ "LameStation_' + split_declaration[0] + '" ] = ' + "'" + declaration + "';\n"
+            final_objects += '\tBlockly.Spin.definitions_[ "' + variable_category + split_declaration[0] + '" ] = ' + "'" + declaration + "';\n"
     
     return ""
 
@@ -148,6 +181,11 @@ def objects(text, label):
 def constants(text, label):
     global final_constants
     global final_content
+    global variable_category
+    
+    text = re.sub( "'.*", "", text )
+    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
+    text = "\n" + text
     
     constants_ = text.split('\n')
     for constant in constants_:
@@ -155,7 +193,7 @@ def constants(text, label):
         
         if split_constant:
             final_constants += " " + split_constant[0]
-            final_content += '\tBlockly.Spin.setups_[ "LameStation_' + split_constant[0] + '" ] = "' + constant + '";\n'
+            final_content += '\tBlockly.Spin.setups_[ "' + variable_category + split_constant[0] + '" ] = "' + constant + '";\n'
     
     return ""
 
@@ -163,6 +201,11 @@ def constants(text, label):
 def variables(text, label):
     global final_variables
     global final_content
+    global variable_category
+    
+    text = re.sub( "'.*", "", text )
+    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
+    text = "\n" + text
     
     variables_ = text.split('\n')
     for variable in variables_:
@@ -170,7 +213,7 @@ def variables(text, label):
     
         if split_variable:
             final_variables += " " + split_variable[1]
-            final_content += '\tBlockly.Spin.setups_[ "LameStation_' + split_variable[1] + '" ] = "' + variable + '";\n'
+            final_content += '\tBlockly.Spin.setups_[ "' + variable_category + split_variable[1] + '" ] = "' + variable + '";\n'
     
     return ""
 
@@ -219,6 +262,7 @@ def compile( f, new_file_name ):
         if label in spinblocks.keys():
             content[label] += spinblocks[label](textblock[i+1], label)
             content[label] += "\n\n"
+            #content[label] = re.sub( "'.*", "", content[label] )
 
     # Final Formatting
 
