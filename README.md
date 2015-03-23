@@ -61,7 +61,7 @@ CON
 
 PUB HelloWorld:
     if test_var_1 > test_var_2:
-        Whatever else in your code block
+        --------Whatever else in your code block--------
 ```
 
 3. Block Names
@@ -70,20 +70,10 @@ By default, the name of the PUB statement will be the name of the block when the
 ```
 Code to generate block from:
 PUB HelloWorld:
-    if test_var_1 > test_var_2:
-        Whatever else in your code block
-
-Code Generated:
-Blockly.Spin.HelloWorld = function() {
-    Generated Spin code here
-};
-
-Code to generate block from:
-PUB HelloWorld:
     'NAME:my_name
     
     if test_var_1 > test_var_2:
-        Whatever else in your code block
+        --------Whatever else in your code block--------
 
 Code generated:
 Blockly.Spin.my_name = function() {
@@ -99,20 +89,10 @@ In addition to changing the Block's name, you can change its category. This can 
 ```
 Code to generate block from:
 PUB HelloWorld:
-    if test_var_1 > test_var_2:
-        Whatever else in your code block
-
-Code Generated:
-Blockly.Language.HelloWorld = function() {
-    Generated Spin code here
-};
-
-Code to generate block from:
-PUB HelloWorld:
     'CATEGORY:my_category
 
     if test_var_1 > test_var_2:
-        Whatever else in your code block
+        --------Whatever else in your code block--------
 
 Code generated:
 Blockly.Language.HelloWorld = {
