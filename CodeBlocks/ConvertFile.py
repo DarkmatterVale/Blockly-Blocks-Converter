@@ -1,10 +1,9 @@
 import os, sys, re
 import argparse
-
+import webbrowser
 import Tkinter as tk
 import ttk as ttk
 import tkMessageBox
-
 import converter as convert
 
 class ConvertFile( tk.Tk ):
@@ -15,9 +14,10 @@ class ConvertFile( tk.Tk ):
         # initialize values
         self.new_file = tk.StringVar()
         
-        self.title("BlocklyProp")
+        self.title("BlocklyProp Code Converter")
         
         self.initialize()
+        self.initialize_menu()
 
     def initialize(self):
         self.grid()
@@ -46,6 +46,35 @@ class ConvertFile( tk.Tk ):
         self.minsize(500, 500)
         
         self.protocol("WM_DELETE_WINDOW", self.handle_close)
+    
+    def initialize_menu( self ):
+        menubar = tk.Menu( self )
+        
+        file_menu = tk.Menu( menubar, tearoff=0 )
+        file_menu.add_command( label="Add File", command=self.add_file )
+        file_menu.add_separator()
+        file_menu.add_command( label="Save File", command=self.save_file )
+        menubar.add_cascade( label="File", menu=file_menu )
+    
+        about_menu = tk.Menu( menubar, tearoff=0 )
+        about_menu.add_command( label="Checkout Source Code", command=self.handle_browser_sourcecode )
+        about_menu.add_separator()
+        about_menu.add_command( label="About BlocklyCodeBlocks", command=self.handle_about )
+        menubar.add_cascade( label="About", menu=about_menu )
+    
+        self.config( menu=menubar )
+    
+    def add_file( self ):
+        pass
+    
+    def save_file( self ):
+        pass
+    
+    def handle_browser_sourcecode( self ):
+        webbrowser.open_new( "http://github.com/DarkmatterVale/BlocklyCodeBlocks" )
+    
+    def handle_about( self ):
+        tkMessageBox.showinfo( "About BlocklyCodeBlocks", "CurrentVersion: v1.1.0\n\nAuthors: Vale Tolpegin\n\nCopyright 2015 Parallax Inc\n\nRelease Notes:\nv1.1.0\n\t-Updated GUI with some menu support\nv1.0.0\n\t-First version of the parser\n\t-First version of the GUI with basic code conversion support" )
     
     def convert( self ):
         converted = convert.compile( self.text_input.get("1.0", tk.END), self.new_file.get() )
