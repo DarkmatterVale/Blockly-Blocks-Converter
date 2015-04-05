@@ -4,6 +4,7 @@ import webbrowser
 import Tkinter as tk
 import ttk as ttk
 import tkMessageBox
+import tkFileDialog
 import converter as convert
 
 class ConvertFile( tk.Tk ):
@@ -39,8 +40,8 @@ class ConvertFile( tk.Tk ):
         self.btn_convert.grid(column=0, row=3, sticky='nesw', padx=3, pady=10)
         
         self.grid_columnconfigure(0, minsize=100)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=2)
+        self.grid_columnconfigure(0, weight=3)
+        self.grid_columnconfigure(1, weight=0)
         self.grid_rowconfigure(2, minsize=400)
         self.resizable(True, True)
         self.minsize(500, 500)
@@ -65,7 +66,9 @@ class ConvertFile( tk.Tk ):
         self.config( menu=menubar )
     
     def add_file( self ):
-        pass
+        new_file = open( tkFileDialog.askopenfilename(), 'r' ).read()
+    
+        self.text_input.insert( tk.END, "\n" + new_file, '' )
     
     def save_file( self ):
         pass
