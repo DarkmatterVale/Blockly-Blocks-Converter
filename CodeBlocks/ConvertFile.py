@@ -5,7 +5,7 @@ import Tkinter as tk
 import ttk as ttk
 import tkMessageBox
 import tkFileDialog
-import converter as convert
+import spin_converter as convert
 
 class ConvertFile( tk.Tk ):
 
