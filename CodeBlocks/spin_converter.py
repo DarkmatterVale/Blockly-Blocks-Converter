@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Filename: converter.py
+# Filename: spin_converter.py
 
 
 #importing required libraries
