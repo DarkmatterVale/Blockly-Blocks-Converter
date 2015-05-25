@@ -80,7 +80,10 @@ class ConvertFile( tk.Tk ):
         tkMessageBox.showinfo( "About BlocklyCodeBlocks", "CurrentVersion: v1.1.0\n\nAuthors: Vale Tolpegin\n\nCopyright 2015 Parallax Inc\n\nRelease Notes:\nv1.1.0\n\t-Updated GUI with some menu support\nv1.0.0\n\t-First version of the parser\n\t-First version of the GUI with basic code conversion support" )
     
     def convert( self ):
-        converted = convert.compile( self.text_input.get("1.0", tk.END), self.new_file.get() )
+        code = self.text_input.get("1.0", tk.END)
+        
+        if "PUB" in code:
+            converted = convert.compile( code, self.new_file.get() )
         
         if converted:
             tkMessageBox.askokcancel("INFO", "Code successfully converted.\n\nNew file created:\n" + self.new_file.get() )
