@@ -5,7 +5,8 @@ import Tkinter as tk
 import ttk as ttk
 import tkMessageBox
 import tkFileDialog
-import spin_converter as convert
+import spin_converter as spin_convert
+import c_converter as c_convert
 
 class ConvertFile( tk.Tk ):
 
@@ -83,7 +84,9 @@ class ConvertFile( tk.Tk ):
         code = self.text_input.get("1.0", tk.END)
         
         if "PUB" in code:
-            converted = convert.compile( code, self.new_file.get() )
+            converted = spin_convert.compile( code, self.new_file.get() )
+        elif "void" in code and ";" in code:
+            converted = c_convert.compile( code, self.new_file.get() )
         
         if converted:
             tkMessageBox.askokcancel("INFO", "Code successfully converted.\n\nNew file created:\n" + self.new_file.get() )
