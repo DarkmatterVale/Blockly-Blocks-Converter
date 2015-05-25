@@ -1,17 +1,25 @@
 # CodeBlocks
 Spin, C, and Forth program converter that generates blocks for BlocklyProp
 
+CodeBlocks will automatically detect which language you are programming in, and use the appropriate parser.
+
 # Introduction
 ----------------
 
-CodeBlocks uses Python to convert Spin, C, or Forth files into .js files that contain the blocks inside of the Spin files, just converted to be usable inside of Blockly.
+CodeBlocks uses Python to convert Spin, C, or Forth files into .js files that contain the blocks inside of Spin file. These converted blocks are usable inside of Blockly.
 
 To build, you will need:
 - Python
 
-Once you have installed all the required dependencies, just navigate to this directory in terminal and type "python ConvertFile.py". This will open a GUI where you can choose which file you would like to convert. The converted file will then be saved inside of the conversions directory.
+Once you have installed all the required dependencies, just navigate to this directory in terminal and type 
 
-# How To Use
+```
+python ConvertFile.py
+```
+
+This will open a GUI where you can choose which file you would like to convert. The converted file will then be saved inside of the conversions directory.
+
+# How To Use ( Spin )
 ----------------
 
 There are a number of items that must be implemented in any Spin code you would like to convert.
@@ -128,6 +136,6 @@ See more in-depth information in the LICENSE file.
 
 To contribute, simply fork this repository, make your changes/enhancements, and create a PR! Please note though, no changes are ever considered "rock solid". All code submitted can be changed, for any reason.
 
-To submit a bug, add an issue on this repository's issue tracker.
+To submit a bug or feature request, add an issue on this repository's issue tracker.
 
 Thanks for the help!
