@@ -27,10 +27,10 @@ def filter_comments(text):
 
 def parse_global_comments( text ):
     global variable_category
-    updated_variables = re.findall( r"'.*", text )
+    updated_variables = re.findall( r"//.*", text )
     
     for var in updated_variables:
-        var = re.sub("'", "", var )
+        var = re.sub("//", "", var )
         if "VAR_CATEGORY:" in var:
             var = re.sub( "VAR_CATEGORY:", "", var )
             
@@ -43,13 +43,13 @@ def parse_comments( text ):
     global final_variables
     global final_content
     global variable_category
-    updated_variables = re.findall( r"'.*", text )
+    updated_variables = re.findall( r"//.*", text )
     
     block_category = "Blockly-Blocks-Converter"
     block_name = ""
 
     for var in updated_variables:
-        var = re.sub("'", "", var )
+        var = re.sub("//", "", var )
             
         if "VAR_NAME:" in var:
             var = re.sub( "VAR_NAME:", "", var )
