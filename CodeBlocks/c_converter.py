@@ -109,8 +109,8 @@ def compile( text, new_file_name ):
         label = textblock[i-1].split('\n')[1]
         
         if label in spinblocks.keys():
-            if ';' in spinblocks[label](textblock[i], label).split('\n')[0]:
-                textblock[i - 2] += label + spinblocks[label](textblock[i], label)
+            if ';' in textblock[i].split('\n')[0]:
+                textblock[i - 2] += label + textblock[i]
                 
                 textblock[i] = "\n"
     
@@ -119,7 +119,7 @@ def compile( text, new_file_name ):
         label = textblock[i].split('\n')[1]
         print label
         
-        if label in spinblocks.keys() and spinblocks[label](textblock[i+1], label) != '\n':
+        if label in spinblocks.keys() and textblock[i+1] != '\n':
             content[label] += label + spinblocks[label](textblock[i+1], label)
             content[label] += "\n\n"
 
