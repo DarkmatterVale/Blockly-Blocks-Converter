@@ -83,10 +83,11 @@ class ConvertFile( tk.Tk ):
     def convert( self ):
         code = self.text_input.get("1.0", tk.END)
         
-        if "PUB" in code:
-            converted = spin_convert.compile( code, self.new_file.get() )
-        elif "void" in code and ";" in code:
-            converted = c_convert.compile( code, self.new_file.get() )
+        #if "PUB" in code:
+        #    converted = spin_convert.compile( code, self.new_file.get() )
+        #elif "void" in code and ";" in code:
+        #    converted = c_convert.compile( code, self.new_file.get() )
+        converted = c_convert.compile( code, self.new_file.get() )
         
         if converted:
             tkMessageBox.askokcancel("INFO", "Code successfully converted.\n\nNew file created:\n" + self.new_file.get() )

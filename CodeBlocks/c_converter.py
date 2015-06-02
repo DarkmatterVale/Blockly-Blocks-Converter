@@ -8,17 +8,15 @@ import os, sys, re
 
 #initializing storage variables for final content
 final_variables   = ""
-final_objects     = ""
 final_content     = ""
-final_constants   = ""
 variable_category = "Blockly-Blocks-Converter"
 
 
 def filter_comments(text):
-    text = re.sub("{{(.*?)}}","",text, flags=re.MULTILINE|re.DOTALL)
-    text = re.sub("{(.*?)}","",text, flags=re.MULTILINE|re.DOTALL)
-    text = re.sub("(?<=\d)_(?=\d)","",text)                           # remove underscores in numbers
+    # Filtering out & parsing global comments
     text = parse_global_comments( text )
+    
+    # Joining lines to make the final text look nice
     text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
     text = "\n" + text
     
@@ -26,264 +24,109 @@ def filter_comments(text):
 
 
 def parse_global_comments( text ):
+    # Get global variables
     global variable_category
-    updated_variables = re.findall( r"//.*", text )
     
-    for var in updated_variables:
-        var = re.sub("//", "", var )
+    # Find all comments
+    comments = re.findall( r"//.*", text )
+    
+    # Looking for set commands the program is parsing for
+    for comment in comments:
+        comment = re.sub("//", "", comment )
         if "VAR_CATEGORY:" in var:
-            var = re.sub( "VAR_CATEGORY:", "", var )
+            comment = re.sub( "VAR_CATEGORY:", "", comment )
             
-            variable_category = var
-    
+            variable_category = comment
+
     return text
 
 
 def parse_comments( text ):
+    # Getting global variables
     global final_variables
     global final_content
     global variable_category
-    updated_variables = re.findall( r"//.*", text )
     
-    block_category = "Blockly-Blocks-Converter"
-    block_name = ""
+    # Finding all of the 1 line comments in the method
+    comments = re.findall( r"//.*", text )
+    
+    # TO DO: implement comment parsing
 
-    for var in updated_variables:
-        var = re.sub("//", "", var )
-            
-        if "VAR_NAME:" in var:
-            var = re.sub( "VAR_NAME:", "", var )
-                
-            final_variables += " " + var
-            
-            if variable_category:
-                final_content += '\tBlockly.Spin.setups_[ "' + variable_category + var + '" ] = "int ' + var + '";\n'
-            else:
-                final_content += '\tBlockly.Spin.setups_[ "' + block_category + var + '" ] = "int ' + var + '";\n'
-        if "CATEGORY:" in var:
-            var = re.sub( "CATEGORY:", "", var )
-            
-            block_category = var
-        if "NAME:" in var:
-            var = re.sub( "NAME:", "", var )
-                
-            block_name = var
-
-    text = re.sub( "'.*", "", text )
+    text = re.sub( "//.*", "", text )
     text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
     text = "\n" + text
 
-    return text, block_category, block_name
-
-
-def function_2_0( text, label ):
-    #initializing global variables
-    global final_variables
-    global final_content
-    global final_objects
-    global final_constants
-    
-    #initializing local variables
-    block_category = ""
-    block_name     = ""
-    
-    #finding method title
-    text = text.split('\n',1)
-    prototype = text[0]
-    if ':' in prototype:
-        if '|' in prototype:
-            title = prototype.split('[:|]')[0]
-        else:
-            title = prototype.split(':')[0]
-    else:
-        if '|' in prototype:
-            title = prototype.split('|')[0]
-        else:
-            title = prototype
-    title = title.strip()
-
-    #parsing comments in each block, then removing whatever is left
-    text[1], block_category, block_name = parse_comments( text[1] )
-
-    if ( block_name ):
-        title = block_name
-
-    #creating interface code
-    interface_spin_title = "Blockly.Language." + title + " = {\n"
-    interface_spin_code = "\tcategory: '" + block_category + "',\n\thelpUrl: '',\n\tinit: function() {\n\t\tthis.appendDummyInput( " + '"" )\n\t\t\t.appendTitle( "' + title + '" );\n'
-    final_content_ui = ""
-
-    #adding interface code for variables
-    inputs = final_variables.split()
-    for input in inputs:
-        temp_code = "\t\tthis.appendValueInput( " + "'" + input + "'" + ' )\n\t\t\t.appendTitle( "get ' + input + '" );\n'
-
-        final_content_ui += temp_code
-
-    #adding all components of interface code together, final interface code
-    interface_spin_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n};"
-
-    #creating spin code
-    block_spin_title = "Blockly.Spin." + title + " = function() {\n"
-    final_content_variables = ""
-
-    #parsing code and substituting variable names in code to allow for variable input
-    inputs = final_variables.split()
-    for input in inputs:
-        final_content_variables += "\tvar " + input + " = Blockly.Spin.valueToCode( this, '" + input + "' );\n"
-
-        text[1] = re.sub( input, '" + ' + input + ' + "', text[1] )
-
-    #parsing code and substituting constant names in code to allow for constant input
-    inputs = final_constants.split()
-    for input in inputs:
-        text[1] = re.sub( input, '" + ' + input + ' + "', text[1] )
-
-    #setting final Spin code
-    block_spin_code = '\tvar code = "' + text[1] + '";\n\treturn code;'
-
-    #Setting final content in block
-    final_content_block = final_content + "\n" + final_objects + "\n" + final_content_variables + "\n" + block_spin_code + "\n};"
-
-    #creating final code for block, interface and code generated
-    text = interface_spin_title + interface_spin_code + "\n\n" + block_spin_title + final_content_block
-    
     return text
 
 
-def data(text, label):
-    text = re.sub( "'.*", "", text )
-    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
-    text = "\n" + text
-    
-    return ""
-
-
-def objects(text, label):
-    global final_objects
-    global variable_category
-    
-    text = re.sub( "'.*", "", text )
-    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
-    text = "\n" + text
-    
-    declarations_ = text.split('\n')
-    for declaration in declarations_:
-        split_declaration = declaration.split()
-        
-        if split_declaration:
-        
-            final_objects += '\tBlockly.Spin.definitions_[ "' + variable_category + split_declaration[0] + '" ] = ' + "'" + declaration + "';\n"
-    
-    return ""
-
-
-def constants(text, label):
-    global final_constants
-    global final_content
-    global variable_category
-    
-    text = re.sub( "'.*", "", text )
-    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
-    text = "\n" + text
-    
-    constants_ = text.split('\n')
-    for constant in constants_:
-        split_constant = constant.split()
-        
-        if split_constant:
-            final_constants += " " + split_constant[0]
-            final_content += '\tBlockly.Spin.setups_[ "' + variable_category + split_constant[0] + '" ] = "' + constant + '";\n'
-    
-    return ""
-
-
-def variables(text, label):
+def function( text, label ):
+    #initializing global variables
     global final_variables
     global final_content
-    global variable_category
-    
-    text = re.sub( "'.*", "", text )
-    text = "\n".join([ll.rstrip() for ll in text.splitlines() if ll.strip()])
-    text = "\n" + text
-    
-    variables_ = text.split('\n')
-    for variable in variables_:
-        split_variable = variable.split()
-    
-        if split_variable:
-            final_variables += " " + split_variable[1]
-            final_content += '\tBlockly.Spin.setups_[ "' + variable_category + split_variable[1] + '" ] = "' + variable + '";\n'
-    
-    return ""
 
+    # TO DO: Add function parsing
+    
+    return text
 
 spinblocks = {
-    'PUB' : function_2_0,
-    'PRI' : function_2_0,
-    'DAT' : data,
-    'VAR' : variables,
-    'CON' : constants,
-    'OBJ' : objects,
+    'void': function,
+    'int': function,
 }
 
 
 def split_into_blocks(text):
-    return filter(None, re.split('(\nPUB)|(\nDAT)|(\nPRI)|(\nVAR)|(\nCON)|(\nOBJ)',text))
+    # Splitting the methods and variables
+    return filter(None, re.split('(\nvoid)|(int)',text))
 
 
-def compile( f, new_file_name ):
-    #initializing global variables
-    global final_variables
-    global final_objects
-    global final_content
-    global final_constants
+def compile( text, new_file_name ):
+    # Adding new line to text fixing random issue caused by parsing
+    text = "\n" + text
     
-    #reset content variables
-    final_variables   = ""
+    # Initializing global variables
+    global final_variables
+    global final_content
+    
+    # Reset content variables
     final_objects     = ""
     final_content     = ""
-    final_constants   = ""
     
-    #filter out comments
-    f = filter_comments(f)
-            
-    textblock = split_into_blocks(f)
-            
+    #Filter out useless things in code
+    text = filter_comments( text )
+    textblock = split_into_blocks( text )
+    
     # Zero out and initialize content variable
     content = {}
     for b in spinblocks.keys():
         content[b] = ""
+
+    # If variables in a method, set those variables back up to the method. Otherwise, they are each found as seperate methods ( since int, for example, can be both a method and a variable )
+    variables = ""
+    for i in xrange( len(textblock) - 1, 0, -2 ):
+        if '\n' not in textblock[i - 1]:
+            textblock[i - 1] = '\n' + textblock[i - 1]
+
+        label = textblock[i-1].split('\n')[1]
         
+        if label in spinblocks.keys():
+            if ';' in spinblocks[label](textblock[i], label).split('\n')[0]:
+                textblock[i - 2] += label + spinblocks[label](textblock[i], label)
+                
+                textblock[i] = "\n"
+    
     ## This code assumes that there is code before your main code
     for i in xrange(0,len(textblock)-1,2):
         label = textblock[i].split('\n')[1]
         print label
-        if label in spinblocks.keys():
-            content[label] += spinblocks[label](textblock[i+1], label)
+        
+        if label in spinblocks.keys() and spinblocks[label](textblock[i+1], label) != '\n':
+            content[label] += label + spinblocks[label](textblock[i+1], label)
             content[label] += "\n\n"
-            #content[label] = re.sub( "'.*", "", content[label] )
 
-    # Final Formatting
-
-    # Assemble pieces into final page for upload
+    # Assembling final code
     finalcontent = "\n\n"
-    finalcontent += content['OBJ']
-    finalcontent += content['CON']
-    finalcontent += content['VAR']
-    finalcontent += content['PRI']
-    finalcontent += content['PUB']
-    finalcontent += content['DAT']
-            
-    # add boiler plate
-    template = open('../templates/block_template.py','r').read()
-    assembled =  template
-    assembled += finalcontent
+    finalcontent += content['void']
+    finalcontent += content['int']
 
-    newfilename = "../conversions/" + os.path.basename( new_file_name ) + '.js'
-    
-    newfile = open(newfilename,'w')
-    newfile.write(assembled)
-    newfile.close()
-
-    return True
+    # Eventually, this code will be put into a file. At this point in time, the program is just printing the code for debugging purposes
+    print finalcontent
