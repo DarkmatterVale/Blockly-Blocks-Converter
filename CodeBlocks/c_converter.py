@@ -8,6 +8,7 @@ import os, sys, re
 
 #initializing storage variables for final content
 final_variables   = ""
+final_includes    = ""
 final_content     = ""
 variable_category = "Blockly-Blocks-Converter"
 
@@ -64,8 +65,63 @@ def function( text, label ):
     global final_variables
     global final_content
 
-    # TO DO: Add function parsing
+    # Getting all of the lines of code in the method
+    lines = text.split( '\n' )
     
+    # Getting title of the block
+    unaltered_title = lines[0].split( " " )[1]
+    unaltered_title = unaltered_title[ 0 : re.search( r'\(', unaltered_title ).start() ]
+    
+    block_title = unaltered_title
+    print block_title
+
+    for line in lines:
+        words = line.split( ' ' )
+        print words
+        
+        if len( words ) > 1:
+            for key in spinblocks.keys():
+                variable = re.sub( ";", "", words[1] )
+            
+                if key in words[0] and variable not in final_variables:
+                    # Find variables and replace them with correct variable values
+                   text = re.sub( variable, '" + ' + variable + ' + "', text )
+
+                    # Adding the variable to the list of variables needed to be added into the
+                   final_variables += "..." + key + " " + variable
+
+    print "----FINAL VARIABLES---"
+    print final_variables
+    print "----------------------"
+
+    return text
+
+
+def filter_global( text ):
+    # Getting global variables
+    global final_variables
+    global final_includes
+
+    # Parse include statements and generate final includes
+    text = text.split( '\n' )
+
+    for index in xrange( 0, len( text ) - 1, 1 ):
+        words = text[ index ].split( " " )
+        
+        if words[0] in spinblocks.keys() or 'null' in words[0]:
+            if '(' in text[ index ] and ')' in text[ index ]:
+                text = "\n".join([ll.rstrip() for ll in text if ll.strip()])
+                text = "\n" + text
+        
+                return text
+            elif ';' in text[ index ]:
+                final_variables += "..." + words[0] + " " + re.sub( ";", "", words[1] )
+
+                text[ index ] = "\n"
+    
+    text = "\n".join([ll.rstrip() for ll in text if ll.strip()])
+    text = "\n" + text
+
     return text
 
 spinblocks = {
@@ -88,11 +144,12 @@ def compile( text, new_file_name ):
     global final_content
     
     # Reset content variables
-    final_objects     = ""
+    final_variables     = ""
     final_content     = ""
     
     #Filter out useless things in code
     text = filter_comments( text )
+    text = filter_global( text )
     textblock = split_into_blocks( text )
     
     # Zero out and initialize content variable
@@ -112,14 +169,26 @@ def compile( text, new_file_name ):
             if ';' in textblock[i].split('\n')[0]:
                 textblock[i - 2] += label + textblock[i]
                 
-                textblock[i] = "\n"
-    
+                textblock[i - 1] = "\nnull"
+            
+            try:
+                if '(' in textblock[i - 2].split('\n')[0] and not ')' in textblock[i - 2].split('\n')[0]:
+                    textblock[i - 2] += label + textblock[i]
+                
+                    textblock[i - 1] = "\nnull"
+                elif ',' in textblock[i - 2].split('\n')[0].split( " " )[1]:
+                    textblock[i - 2] += label + textblock[i]
+                
+                    textblock[i - 1] = "\nnull"
+            except:
+                pass
+
     ## This code assumes that there is code before your main code
     for i in xrange(0,len(textblock)-1,2):
         label = textblock[i].split('\n')[1]
         print label
         
-        if label in spinblocks.keys() and textblock[i+1] != '\n':
+        if label in spinblocks.keys():
             content[label] += label + spinblocks[label](textblock[i+1], label)
             content[label] += "\n\n"
 
