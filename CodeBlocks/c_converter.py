@@ -87,14 +87,42 @@ def function( text, label ):
                    text = re.sub( variable, '" + ' + variable + ' + "', text )
 
                     # Adding the variable to the list of variables needed to be added into the
-                   final_variables += "..." + key + " " + variable
+                   final_variables += "... " + key + " " + variable
 
-    print "----FINAL VARIABLES---"
-    print final_variables
-    print "----------------------"
-    print "----FINAL INCLUDES----"
-    print final_includes
-    print "----------------------"
+    # Creating variables
+    variables       = final_variables.split( "..." )
+    includes        = final_includes.split( "..." )
+    block_variables = ""
+    block_includes  = ""
+    
+    for variable in variables:
+        if variable == '':
+            continue
+        
+        block_variables += '\tBlockly.propc.setups_[ "' + variable.split( ' ' )[1] + '" ] = "' + variable + ';";\n'
+    
+    for include in includes:
+        if include == '':
+            continue
+        
+        include_name = include.split( ' ' )[1]
+        
+        if '<' in include_name:
+            include_name = re.sub( r'\<', '', include_name )
+            include_name = re.sub( r'\>', '', include_name )
+        elif '"' in include_name:
+            include_name = re.sub( r'\"', '', include_name )
+
+        block_includes += '\tBlockly.propc.definitions_[ "' + include_name + '" ] = "' + include + '";\n'
+
+    # Resetting global variables that are now obsolete
+    final_variables = ""
+    
+    print "..."
+    print block_variables
+    print "..."
+    print block_includes
+    print "..."
 
     return text
 
@@ -150,11 +178,13 @@ def compile( text, new_file_name ):
     
     # Initializing global variables
     global final_variables
+    global final_includes
     global final_content
     
     # Reset content variables
-    final_variables     = ""
-    final_content     = ""
+    final_variables = ""
+    final_includes  = ""
+    final_content   = ""
     
     #Filter out useless things in code
     text = filter_comments( text )
