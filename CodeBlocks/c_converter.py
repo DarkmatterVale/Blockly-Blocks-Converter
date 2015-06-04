@@ -135,12 +135,13 @@ def filter_global( text ):
 spinblocks = {
     'void': function,
     'int': function,
+    'char': function,
 }
 
 
 def split_into_blocks(text):
     # Splitting the methods and variables
-    return filter(None, re.split('(\nvoid)|(int)',text))
+    return filter(None, re.split('(\nvoid)|(int)|(char)',text))
 
 
 def compile( text, new_file_name ):
@@ -204,6 +205,7 @@ def compile( text, new_file_name ):
     finalcontent = "\n\n"
     finalcontent += content['void']
     finalcontent += content['int']
+    finalcontent += content['char']
 
     # Eventually, this code will be put into a file. At this point in time, the program is just printing the code for debugging purposes
     print finalcontent
