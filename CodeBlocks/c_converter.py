@@ -63,6 +63,7 @@ def parse_comments( text ):
 def function( text, label ):
     #initializing global variables
     global final_variables
+    global final_includes
     global final_content
 
     # Getting all of the lines of code in the method
@@ -73,11 +74,9 @@ def function( text, label ):
     unaltered_title = unaltered_title[ 0 : re.search( r'\(', unaltered_title ).start() ]
     
     block_title = unaltered_title
-    print block_title
 
     for line in lines:
         words = line.split( ' ' )
-        print words
         
         if len( words ) > 1:
             for key in spinblocks.keys():
@@ -92,6 +91,9 @@ def function( text, label ):
 
     print "----FINAL VARIABLES---"
     print final_variables
+    print "----------------------"
+    print "----FINAL INCLUDES----"
+    print final_includes
     print "----------------------"
 
     return text
@@ -108,15 +110,21 @@ def filter_global( text ):
     for index in xrange( 0, len( text ) - 1, 1 ):
         words = text[ index ].split( " " )
         
-        if words[0] in spinblocks.keys() or 'null' in words[0]:
-            if '(' in text[ index ] and ')' in text[ index ]:
+        if '#' in text[ index ] and words[0] not in spinblocks.keys() and 'null' not in words[0]:
+            final_includes += "..." + text[ index ]
+            
+            text[ index ] = "\n"
+        elif words[0] in spinblocks.keys() or 'null' in words[0]:
+            if '(' in text[ index ] and ')' in text[ index ] and ';' not in text[index]:
                 text = "\n".join([ll.rstrip() for ll in text if ll.strip()])
                 text = "\n" + text
         
                 return text
-            elif ';' in text[ index ]:
+            elif '(' not in text[ index ] and ')' not in text[ index ] and ';' in text[ index ]:
                 final_variables += "..." + words[0] + " " + re.sub( ";", "", words[1] )
 
+                text[ index ] = "\n"
+            elif '(' in text[ index ] and ')' in text[ index ] and ';' in text[index]:
                 text[ index ] = "\n"
     
     text = "\n".join([ll.rstrip() for ll in text if ll.strip()])
