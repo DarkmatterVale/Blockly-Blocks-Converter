@@ -84,28 +84,44 @@ def function( text, label ):
             
                 if key in words[0] and variable not in final_variables:
                     # Find variables and replace them with correct variable values
-                   text = re.sub( variable, '" + ' + variable + ' + "', text )
+                    #text = re.sub( variable, '" + ' + variable + ' + "', text )
 
                     # Adding the variable to the list of variables needed to be added into the
-                   final_variables += "... " + key + " " + variable
+                    final_variables += "... " + key + " " + variable
+
+    for variable in final_variables.split( "..." ):
+        if variable == '':
+            continue
+        
+        print variable
+        
+        text = re.sub( variable.split( ' ' )[1], '" + ' + variable.split( ' ' )[1] + ' + "', text )
 
     # Creating variables
-    variables       = final_variables.split( "..." )
-    includes        = final_includes.split( "..." )
-    block_variables = ""
-    block_includes  = ""
+    variables               = final_variables.split( "..." )
+    includes                = final_includes.split( "..." )
+    block_variables         = ""
+    block_includes          = ""
+    final_content_ui        = ""
+    final_content_variables = ""
+    block_category          = "BlocklyConverter"
     
     for variable in variables:
         if variable == '':
             continue
         
         block_variables += '\tBlockly.propc.setups_[ "' + variable.split( ' ' )[1] + '" ] = "' + variable + ';";\n'
-    
+        
+        temp_code = "\t\tthis.appendValueInput( " + "'" + variable.split( ' ' )[1] + "'" + ' )\n\t\t\t.appendTitle( "get ' + variable.split( ' ' )[1] + '" );\n'
+        final_content_ui += temp_code
+        
+        final_content_variables += "\tvar " + variable.split( ' ' )[1] + " = Blockly.propc.valueToCode( this, '" + variable.split( ' ' )[1] + "' );\n"
+
     for include in includes:
         if include == '':
             continue
         
-        include_name = include.split( ' ' )[1]
+        include_name = include.split( ' ' )[2]
         
         if '<' in include_name:
             include_name = re.sub( r'\<', '', include_name )
@@ -115,14 +131,16 @@ def function( text, label ):
 
         block_includes += '\tBlockly.propc.definitions_[ "' + include_name + '" ] = "' + include + '";\n'
 
-    # Resetting global variables that are now obsolete
-    final_variables = ""
-    
-    print "..."
-    print block_variables
-    print "..."
-    print block_includes
-    print "..."
+    interface_title = "\nBlockly.Language." + block_title + " = {\n"
+    interface_code = "\tcategory: '" + block_category + "',\n\thelpUrl: '',\n\tinit: function() {\n\t\tthis.appendDummyInput( " + '"" )\n\t\t\t.appendTitle( "' + block_title + '" );\n'
+    interface_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n};"
+
+    block_code_title = "Blockly.propc." + block_title + " = function() {\n"
+    block_code = '\tvar code = "' + text + '";\n\treturn code;'
+
+
+    final_content_block = final_content_variables + "\n" + block_includes + "\n" + block_variables + "\n" + block_code + "\n};"
+    text = interface_title + interface_code + "\n\n" + block_code_title + final_content_block
 
     return text
 
@@ -139,7 +157,7 @@ def filter_global( text ):
         words = text[ index ].split( " " )
         
         if '#' in text[ index ] and words[0] not in spinblocks.keys() and 'null' not in words[0]:
-            final_includes += "..." + text[ index ]
+            final_includes += "... " + text[ index ]
             
             text[ index ] = "\n"
         elif words[0] in spinblocks.keys() or 'null' in words[0]:
@@ -160,6 +178,7 @@ def filter_global( text ):
 
     return text
 
+
 spinblocks = {
     'void': function,
     'int': function,
@@ -173,7 +192,7 @@ def split_into_blocks(text):
 
 
 def compile( text, new_file_name ):
-    # Adding new line to text fixing random issue caused by parsing
+    # Adding new line to text fixing random issue claused by parsing
     text = "\n" + text
     
     # Initializing global variables
@@ -237,5 +256,14 @@ def compile( text, new_file_name ):
     finalcontent += content['int']
     finalcontent += content['char']
 
-    # Eventually, this code will be put into a file. At this point in time, the program is just printing the code for debugging purposes
-    print finalcontent
+    template = open('../templates/block_template_c.py','r').read()
+    assembled =  template
+    assembled += finalcontent
+    
+    newfilename = "../conversions/" + os.path.basename( new_file_name ) + '.js'
+    
+    newfile = open(newfilename,'w')
+    newfile.write(assembled)
+    newfile.close()
+
+    return True
