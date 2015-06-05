@@ -93,8 +93,6 @@ def function( text, label ):
         if variable == '':
             continue
         
-        print variable
-        
         text = re.sub( variable.split( ' ' )[1], '" + ' + variable.split( ' ' )[1] + ' + "', text )
 
     # Creating variables
@@ -188,7 +186,7 @@ spinblocks = {
 
 def split_into_blocks(text):
     # Splitting the methods and variables
-    return filter(None, re.split('(\nvoid)|(int)|(char)',text))
+    return filter(None, re.split('(\nvoid)|(\nint)|(\nchar)|(int)|(char)',text))
 
 
 def compile( text, new_file_name ):
@@ -247,7 +245,7 @@ def compile( text, new_file_name ):
         print label
         
         if label in spinblocks.keys():
-            content[label] += label + spinblocks[label](textblock[i+1], label)
+            content[label] += spinblocks[label](textblock[i+1], label)
             content[label] += "\n\n"
 
     # Assembling final code
