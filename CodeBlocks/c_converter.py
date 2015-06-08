@@ -65,7 +65,7 @@ def function( text, label ):
     global final_variables
     global final_includes
     global final_content
-
+    
     # Getting all of the lines of code in the method
     lines = text.split( '\n' )
     
@@ -75,6 +75,7 @@ def function( text, label ):
     
     block_title = unaltered_title
 
+    methods = ""
     for line in lines:
         words = line.split( ' ' )
         
@@ -83,11 +84,18 @@ def function( text, label ):
                 variable = re.sub( ";", "", words[1] )
             
                 if key in words[0] and variable not in final_variables:
-                    # Find variables and replace them with correct variable values
-                    #text = re.sub( variable, '" + ' + variable + ' + "', text )
-
                     # Adding the variable to the list of variables needed to be added into the
                     final_variables += "... " + key + " " + variable
+
+            if '(' in line and ')' in line and ';' in line:
+                for word in words:
+                    if '(' in word:
+                        method_name = re.sub( '(', '', word )
+
+                        if method_name in methods:
+                            pass
+                        else:
+                            methods += ',' + block_tile + ' ' + method_name
 
     for variable in final_variables.split( "..." ):
         if variable == '':
@@ -253,6 +261,9 @@ def compile( text, new_file_name ):
     finalcontent += content['void']
     finalcontent += content['int']
     finalcontent += content['char']
+
+    print final_content
+    exit( 0 )
 
     template = open('../templates/block_template_c.py','r').read()
     assembled =  template
