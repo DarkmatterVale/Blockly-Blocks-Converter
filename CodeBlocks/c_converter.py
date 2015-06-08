@@ -74,6 +74,17 @@ def function( text, label ):
     unaltered_title = unaltered_title[ 0 : re.search( r'\(', unaltered_title ).start() ]
     
     block_title = unaltered_title
+    
+    words = lines[0].split( ' ' )
+    for index in range( 0, len( words ) - 1 ):
+        for key in spinblocks.keys():
+            if key in words[ index ]:
+                variable = words[ index + 1 ]
+
+                if ',' in variable:
+                    variable = re.sub( ',', '', variable )
+
+                final_variables += "..." + key + " " + variable
 
     methods = ""
     for line in lines:
@@ -96,12 +107,6 @@ def function( text, label ):
                             pass
                         else:
                             methods += ',' + block_tile + ' ' + method_name
-
-    for variable in final_variables.split( "..." ):
-        if variable == '':
-            continue
-        
-        text = re.sub( variable.split( ' ' )[1], '" + ' + variable.split( ' ' )[1] + ' + "', text )
 
     # Creating variables
     variables               = final_variables.split( "..." )
@@ -142,7 +147,7 @@ def function( text, label ):
     interface_code += final_content_ui + "\t\tthis.setPreviousStatement( true, null );\n\t\tthis.setNextStatement( true, null );\n\t}\n};"
 
     block_code_title = "Blockly.propc." + block_title + " = function() {\n"
-    block_code = '\tvar code = "' + text + '";\n\treturn code;'
+    block_code = '\tvar code = "' + label + text + '";\n\treturn code;'
 
 
     final_content_block = final_content_variables + "\n" + block_includes + "\n" + block_variables + "\n" + block_code + "\n};"
@@ -261,9 +266,6 @@ def compile( text, new_file_name ):
     finalcontent += content['void']
     finalcontent += content['int']
     finalcontent += content['char']
-
-    print final_content
-    exit( 0 )
 
     template = open('../templates/block_template_c.py','r').read()
     assembled =  template
