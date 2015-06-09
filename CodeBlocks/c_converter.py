@@ -79,12 +79,18 @@ def function( text, label ):
     for index in range( 0, len( words ) - 1 ):
         for key in spinblocks.keys():
             if key in words[ index ]:
-                variable = words[ index + 1 ]
+                if words[ index + 1 ] == "*":
+                    variable = words[ index + 1 ]
+                else:
+                    variable = words[ index + 2 ]
 
                 if ',' in variable:
                     variable = re.sub( ',', '', variable )
 
-                final_variables += "..." + key + " " + variable
+                if words[ index + 1 ] == "*":
+                    final_variables += "..." + key + " * " + variable
+                else:
+                    final_variables += "..." + key + " " + variable
 
     methods = ""
     for line in lines:
@@ -92,11 +98,17 @@ def function( text, label ):
         
         if len( words ) > 1:
             for key in spinblocks.keys():
-                variable = re.sub( ";", "", words[1] )
+                if words[1] == "*":
+                    variable = re.sub( ";", "", words[2] )
+                else:
+                    variable = re.sub( ";", "", words[1] )
             
                 if key in words[0] and variable not in final_variables:
                     # Adding the variable to the list of variables needed to be added into the
-                    final_variables += "... " + key + " " + variable
+                    if words[1] == "*":
+                        final_variables += "... " + key + " * " + variable
+                    else:
+                        final_variables += "... " + key + " " + variable
 
             if '(' in line and ')' in line and ';' in line:
                 for word in words:
@@ -121,12 +133,24 @@ def function( text, label ):
         if variable == '':
             continue
         
-        block_variables += '\tBlockly.propc.setups_[ "' + variable.split( ' ' )[1] + '" ] = "' + variable + ';";\n'
+        words = variable.split( ' ' )
+
+        if words[1] == "*":
+            block_variables += '\tBlockly.propc.setups_[ "' + variable.split( ' ' )[2] + '" ] = "' + variable + ';";\n'
         
-        temp_code = "\t\tthis.appendValueInput( " + "'" + variable.split( ' ' )[1] + "'" + ' )\n\t\t\t.appendTitle( "get ' + variable.split( ' ' )[1] + '" );\n'
-        final_content_ui += temp_code
+            temp_code = "\t\tthis.appendValueInput( " + "'" + variable.split( ' ' )[2] + "'" + ' )\n\t\t\t.appendTitle( "get ' + variable.split( ' ' )[2] + '" );\n'
+
+            final_content_ui += temp_code
         
-        final_content_variables += "\tvar " + variable.split( ' ' )[1] + " = Blockly.propc.valueToCode( this, '" + variable.split( ' ' )[1] + "' );\n"
+            final_content_variables += "\tvar " + variable.split( ' ' )[2] + " = Blockly.propc.valueToCode( this, '" + variable.split( ' ' )[2] + "' );\n"
+        else:
+            block_variables += '\tBlockly.propc.setups_[ "' + variable.split( ' ' )[1] + '" ] = "' + variable + ';";\n'
+            
+            temp_code = "\t\tthis.appendValueInput( " + "'" + variable.split( ' ' )[1] + "'" + ' )\n\t\t\t.appendTitle( "get ' + variable.split( ' ' )[1] + '" );\n'
+            
+            final_content_ui += temp_code
+            
+            final_content_variables += "\tvar " + variable.split( ' ' )[1] + " = Blockly.propc.valueToCode( this, '" + variable.split( ' ' )[1] + "' );\n"
 
     for include in includes:
         if include == '':
@@ -178,7 +202,10 @@ def filter_global( text ):
         
                 return text
             elif '(' not in text[ index ] and ')' not in text[ index ] and ';' in text[ index ]:
-                final_variables += "..." + words[0] + " " + re.sub( ";", "", words[1] )
+                if words[1] == "*":
+                    final_variables += "..." + words[0] + " * " + re.sub( ";", "", words[2] )
+                else:
+                    final_variables += "..." + words[0] + " " + re.sub( ";", "", words[1] )
 
                 text[ index ] = "\n"
             elif '(' in text[ index ] and ')' in text[ index ] and ';' in text[index]:
