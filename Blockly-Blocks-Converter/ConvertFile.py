@@ -6,18 +6,23 @@ import ttk as ttk
 import tkMessageBox
 import tkFileDialog
 import spin_converter as spin_convert
-import c_converter as c_convert
+from c_converter_class import CConverter
 
-class ConvertFile( tk.Tk ):
+
+class ConvertFile(tk.Tk):
+    """
+    A GUI converter for BlocklyProp blocks
+    """
 
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        # initialize values
+        # Instantiating converters
+        self.cconverter = CConverter()
+
+        # Initialize GUI
         self.new_file = tk.StringVar()
-
         self.title("BlocklyProp Code Converter")
-
         self.initialize()
         self.initialize_menu()
 
@@ -25,7 +30,7 @@ class ConvertFile( tk.Tk ):
         self.grid()
 
         self.text_input = tk.Text( self, height = 4, width = 5, borderwidth=10 )
-        self.text_input.grid(column=0, row=2, stick='nesw', padx=3, pady=10)
+        self.text_input.grid(column=0, row=2, stick='nesw', padx=3, pady=10, columnspan=2)
         self.text_input.insert(tk.END, 'Add Spin code here', '')
 
         self.lbl_ip_address = ttk.Label(self, anchor=tk.E, text='Tool for converting Spin files into blocks')
@@ -83,10 +88,11 @@ class ConvertFile( tk.Tk ):
     def convert( self ):
         code = self.text_input.get("1.0", tk.END)
 
+        converted = False
         if "PUB" in code:
             converted = spin_convert.compile( code, self.new_file.get() )
-        elif "void" in code and ";" in code:
-            converted = c_convert.compile( code, self.new_file.get() )
+        else:
+            converted = self.cconverter.compile(code, self.new_file.get())
 
         if converted:
             tkMessageBox.askokcancel("INFO", "Code successfully converted.\n\nNew file created:\n" + self.new_file.get() )
