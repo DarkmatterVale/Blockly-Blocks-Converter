@@ -19,7 +19,7 @@
  */
 'use strict';
 
-if ( !Blockly.Language )
+if (!Blockly.Language)
     Blockly.Language = {};
 
-Blockly.Spin = Blockly.Generator.get( 'Spin' );
+Blockly.Spin = Blockly.Generator.get('Spin');

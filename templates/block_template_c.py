@@ -19,7 +19,7 @@
  */
 'use strict';
 
-if ( !Blockly.Language )
+if (!Blockly.Language)
     Blockly.Language = {};
 
-Blockly.propc = Blockly.Generator.get( 'propc' );
+Blockly.propc = Blockly.Generator.get('propc');
